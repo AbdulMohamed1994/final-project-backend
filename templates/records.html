@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+   <body>
+
+      <table border = 1>
+         <thead>
+            <td>ID</td>
+            <td>Name</td>
+            <td>Surname</td>
+            <td>email</td>
+            <td>address</td>
+            <td>suburb</td>
+            <td>city</td>
+            <td>zipcode</td>
+            <td>password</td>
+         </thead>
+
+         {% for row in rows %}
+            <tr>
+               <td>{{row["id"]}}</td>
+               <td>{{row["name"]}}</td>
+               <td> {{row["surname"]}}</td>
+               <td>{{row["email"]}}</td>
+               <td>{{row["address"]}}</td>
+               <td>{{row["suburb"]}}</td>
+               <td> {{row["city"]}}</td>
+               <td>{{row["zipcode"]}}</td>
+               <td>{{row["pin_code"]}}</td>
+            </tr>
+         {% endfor %}
+      </table>
+
+      <a href = "/">Go back to home page</a>
+
+   </body>
+</html>
