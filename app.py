@@ -3,54 +3,47 @@ from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 
 
-app = Flask(__name__)
-CORS(app)
-
 def dict_factory(cursor, row):
     d = {}
     for idx, col in enumerate(cursor.description):
         d[col[0]] = row[idx]
     return d
 
-#Open Database and creates tables registration and products
-@app.route('/')
+
+# Open Database and creates tables registration and products
 def init_sqlite_db():
+    conn = sql.connect("database.db")
+    conn.execute('CREATE TABLE IF NOT EXISTS registration (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, surname TEXT, email TEXT, address TEXT, suburb TEXT,  city TEXT, zipcode TEXT, password TEXT)')
+    print('registration table created.')
+
+    conn.execute('CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, price TEXT, Quantity TEXT, image BLOB, description TEXT)')
+    print('products table created.')
+    conn.close()
+
+
+init_sqlite_db()
+
+app = Flask(__name__)
+CORS(app)
+
+
+def create_product():
     with sql.connect("database.db") as conn:
-        conn.cursor()
-        conn.execute(
-            'CREATE TABLE IF NOT EXISTS registration (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, surname TEXT, email TEXT, address TEXT, suburb TEXT,  city TEXT, zipcode TEXT, password TEXT)')
-        conn.execute(
-            'CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, price TEXT, Quantity TEXT, image BLOB, description TEXT,)')
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO products(name, price, Quantity, image, description) VALUES (? , ? , ? , ? , ?)', ('Nike Air Presto', 850.00, 10, 'image', 'Takkies'))
         conn.commit()
 
-def products():
-    with sql.connect("database.db") as conn:
-        conn.cursor()
-       
-        conn.execute(
-            'INSERT INTO Products(name, price, Quantity, image, description) VALUES (Nike Air Presto, 850.00, 10, image, Takkies)')
-            # 'INSERT INTO Products(Nike, 350.00, 10, image, Takkies)'
-            # 'INSERT INTO Products(Nike, 350.00, 10, image, Takkies)'
-            # 'INSERT INTO Products(Nike, 350.00, 10, image, Takkies)'
-            # 'INSERT INTO Products(Nike, 350.00, 10, image, Takkies)'
-            # 'INSERT INTO Products(Nike, 350.00, 10, image, Takkies)'
-            # 'INSERT INTO Products(Nike, 350.00, 10, image, Takkies)'
-            # 'INSERT INTO Products(Nike, 350.00, 10, image, Takkies)'
-            # 'INSERT INTO Products(Nike, 350.00, 10, image, Takkies)'
-            # 'INSERT INTO Products(Nike, 350.00, 10, image, Takkies)'
-            # 'INSERT INTO Products(Nike, 350.00, 10, image, Takkies)')
-        conn.commit()
-        # init_sqlite_db()
 
-    return render_template('index.html')
+create_product()
 
-#Opens Registration Form
+
+# Opens Registration Form
 @app.route('/registration/', methods=['GET'])
 def enter_new_user():
     return render_template('registration.html')
 
 
-#Adding User to Registration database according to user inputs
+# Adding User to Registration database according to user inputs
 @app.route('/add-new-record/', methods=['POST'])
 def add_new_record():
     if request.method == "POST":
@@ -68,17 +61,18 @@ def add_new_record():
             with sql.connect('database.db') as con:
                 cur = con.cursor()
                 cur.execute(
-                    "INSERT INTO registration (name, surname, email, address, suburb, city, zipcode, pin_code) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    "INSERT INTO registration (name, surname, email, address, suburb, city, zipcode, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                     (name, surname, email, address, suburb, city, zipcode, password))
                 con.commit()
                 msg = name + " was successfully added to the database."
         except Exception as e:
             con.rollback()
-            msg = "Error occurred in insert operation: " + e
+            msg = "Error occurred in insert operation: " + str(e)
         finally:
             return jsonify(msg=msg)
 
-#Displays records saved in Database
+
+# Displays records saved in Database
 @app.route('/show-records/', methods=["GET"])
 def show_records():
     con = sql.connect("database.db")
@@ -86,11 +80,13 @@ def show_records():
     cur = con.cursor()
     cur.execute("select * from registration")
     rows = cur.fetchall()
-    con.execute("select * from Products")
-    products = cur.fetchall()
-    return jsonify(rows, products)
+    cur.execute("select * from products")
+    product_list = cur.fetchall()
+    return jsonify(rows, product_list)
+    return jsonify(product_list)
 
-#Deletes user from Database
+
+# Deletes user from Database
 @app.route('/delete-user/<int:registration_id>/', methods=["GET"])
 def delete_user(registration_id):
     msg = None
