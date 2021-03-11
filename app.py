@@ -138,13 +138,13 @@ create_product()
 
 
 # Opens Registration Form
-@app.route('/registration/', methods=['GET'])
+@app.route('https://final-database.herokuapp.com/registration/', methods=['GET'])
 def enter_new_user():
     return render_template('registration.html')
 
 
 # Adding User to Registration database according to user inputs
-@app.route('/add-new-record/', methods=['POST'])
+@app.route('https://final-database.herokuapp.com/add-new-record/', methods=['POST'])
 def add_new_record():
     if request.method == "POST":
         msg = None
@@ -174,7 +174,7 @@ def add_new_record():
 
 
 # Displays records saved in Database
-@app.route('/show-records/', methods=["GET"])
+@app.route('https://final-database.herokuapp.com/show-records/', methods=["GET"])
 def show_records():
     con = sql.connect("database.db")
     con.row_factory = dict_factory
@@ -188,7 +188,7 @@ def show_records():
 
 
 # Displays single record saved in Database
-@app.route('/show-records/<int:product_id>/', methods=["GET"])
+@app.route('https://final-database.herokuapp.com/show-records/<int:product_id>/', methods=["GET"])
 def show_record(product_id):
     con = sql.connect("database.db")
     con.row_factory = dict_factory
